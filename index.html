@@ -576,29 +576,29 @@
             const maxY = Math.max(...curveData.map(p => p.y)) || 1;
             
             const datasets = [
-                // {
-                //     label: 'Actual Frequency',
-                //     data: barData,
-                //     type: 'bar',
-                //     backgroundColor: 'rgba(75, 192, 192, 0.4)',
-                //     borderColor: 'rgba(75, 192, 192, 1)',
-                //     borderWidth: 1,
-                //     barPercentage: 0.95,
-                //     categoryPercentage: 0.95,
-                //     yAxisID: 'yFrequency'
-                // },
-                // {
-                //     label: 'Normal Distribution Curve',
-                //     data: curveData,
-                //     type: 'line',
-                //     borderColor: 'rgba(26, 115, 232, 1)',
-                //     backgroundColor: 'rgba(26, 115, 232, 0.05)',
-                //     borderWidth: 2.5,
-                //     fill: true,
-                //     tension: 0.4,
-                //     pointRadius: 0,
-                //     yAxisID: 'yDensity'
-                // }
+                {
+                    label: 'Actual Frequency',
+                    data: barData,
+                    type: 'bar',
+                    backgroundColor: 'rgba(75, 192, 192, 0.4)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    barPercentage: 0.95,
+                    categoryPercentage: 0.95,
+                    yAxisID: 'yFrequency'
+                },
+                {
+                    label: 'Normal Distribution Curve',
+                    data: curveData,
+                    type: 'line',
+                    borderColor: 'rgba(26, 115, 232, 1)',
+                    backgroundColor: 'rgba(26, 115, 232, 0.05)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    yAxisID: 'yDensity'
+                }
             ];
 
             function addVerticalLine(xVal, label, color, dash = []) {
@@ -642,12 +642,16 @@
                     const displayStd = stdDev.toFixed(4);
                     const displayCp = cp !== null ? cp.toFixed(3) : 'N/A';
                     const displayCpk = cpk !== null ? cpk.toFixed(3) : 'N/A';
-                    
-                    const row1Text = `USL: ${displayUsl}   |   Nominal: ${displayNom}   |   LSL: ${displayLsl}   |   Mean: ${displayMean}   |   StDev: ${displayStd}`;
-                    const row2Text = `Cp: ${displayCp}   |   Cpk: ${displayCpk}   |   DPMO (<LSL): ${dpmoLSL.toLocaleString()}   |   DPMO (>USL): ${dpmoUSL.toLocaleString()}`;
+
+                    const row1Text = ` `;
+                    const row2Text = `USL: ${displayUsl}   |    Mean: ${displayMean}   |   DPMO (<LSL): ${dpmoLSL.toLocaleString()}`;
+                    const row3Text = `Nominal: ${displayNom}   |   StDev: ${displayStd}   |   DPMO (>USL): ${dpmoUSL.toLocaleString()}`;
+                    const row4Text = `LSL: ${displayLsl}   |   Cp: ${displayCp}   |   Cpk: ${displayCpk}`;
 
                     ctx.fillText(row1Text, left, bottom + 40);
                     ctx.fillText(row2Text, left, bottom + 60);
+                    ctx.fillText(row3Text, left, bottom + 60);
+                    ctx.fillText(row4Text, left, bottom + 60);
                     ctx.restore();
                 }
             };
@@ -666,9 +670,9 @@
                     },
                     plugins: {
                         legend: {
-                            // labels: {
-                            //     filter: (item) => ['Normal Distribution', 'Actual Frequency', 'LSL', 'Target Spec', 'USL'].some(k => item.text.includes(k))
-                            // }
+                            labels: {
+                                filter: (item) => ['Normal Distribution', 'Actual Frequency', 'LSL', 'Target Spec', 'USL'].some(k => item.text.includes(k))
+                            }
                         },
                         tooltip: {
                             callbacks: {
