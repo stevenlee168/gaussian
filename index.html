@@ -644,14 +644,16 @@
                     const displayCpk = cpk !== null ? cpk.toFixed(3) : 'N/A';
 
                     const row1Text = ` `;
-                    const row2Text = `USL: ${displayUsl}   |    Mean: ${displayMean}   |   DPMO (<LSL): ${dpmoLSL.toLocaleString()}`;
-                    const row3Text = `Nominal: ${displayNom}   |   StDev: ${displayStd}   |   DPMO (>USL): ${dpmoUSL.toLocaleString()}`;
-                    const row4Text = `LSL: ${displayLsl}   |   Cp: ${displayCp}   |   Cpk: ${displayCpk}`;
+                    const row2Text = `USL: ${displayUsl}   |    Mean: ${displayMean}   |   DPMO (<LSL): ${dpmoLSL.toLocaleString()}/n
+                    Nominal: ${displayNom}   |   StDev: ${displayStd}   |   DPMO (>USL): ${dpmoUSL.toLocaleString()}/n
+                    LSL: ${displayLsl}   |   Cp: ${displayCp}   |   Cpk: ${displayCpk}`;
+                    // const row3Text = `Nominal: ${displayNom}   |   StDev: ${displayStd}   |   DPMO (>USL): ${dpmoUSL.toLocaleString()}`;
+                    // const row4Text = `LSL: ${displayLsl}   |   Cp: ${displayCp}   |   Cpk: ${displayCpk}`;
 
                     ctx.fillText(row1Text, left, bottom + 40);
                     ctx.fillText(row2Text, left, bottom + 60);
-                    ctx.fillText(row3Text, left, bottom + 120);
-                    ctx.fillText(row4Text, left, bottom + 180);
+                    // ctx.fillText(row3Text, left, bottom + 120);
+                    // ctx.fillText(row4Text, left, bottom + 180);
                     ctx.restore();
                 }
             };
