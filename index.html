@@ -122,7 +122,7 @@
         }
         .chart-container {
             flex: 1;
-            position: relative;
+	    position: relative;
             min-height: 0;
             padding: 0 15px 75px 15px;
         }
@@ -379,23 +379,36 @@
                 remainingText = match[2]; 
             }
 
-            let lines = remainingText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '');
-            let startRow = parentRow;
+            // Parse clipboard as a 2D table (rows × columns)
+            const rows = remainingText
+                .trim()
+                .split(/\r?\n/)
+                .map(row => row.split('\t'));
+            
+            const startRowIndex = parentRow.rowIndex - 1; // subtract header row
+            const startColIndex = columnIndex;
 
-            lines.forEach((line, index) => {
-                if (startRow) {
-                    startRow.cells[columnIndex].textContent = line;
-                    let nextRow = startRow.nextElementSibling;
-                    
-                    if (!nextRow && index < lines.length - 1) {
-                        addDataRow();
-                        nextRow = gridBody.lastElementChild;
-                    }
-                    startRow = nextRow;
-                }
+            const requiredColumns = startColIndex + rows[0].length - 1;
+            // Add columns if necessary
+            while (requiredColumns > colCount) {
+                addColumn();
+            }
+            
+            // Add rows if necessary
+            while (startRowIndex + rows.length > rowCount) {
+                addDataRow();
+            }
+            
+            // Paste values
+            rows.forEach((rowData, r) => {
+                const targetRow = gridBody.rows[startRowIndex + r];
+            
+                rowData.forEach((value, c) => {
+                    targetRow.cells[startColIndex + c].textContent = value.trim();
+                });
             });
-
-            activeColumnIndex = columnIndex - 1;
+            
+            activeColumnIndex = startColIndex - 1;
             updateChart();
         }
 
@@ -603,7 +616,7 @@
                     yAxisID: 'yFrequency'
                 },
                 {
-                    label: 'Normal Distribution Curve',
+                    label: 'Normal Distribution',
                     data: curveData,
                     type: 'line',
                     borderColor: 'rgba(26, 115, 232, 1)',
@@ -650,25 +663,37 @@
                     ctx.fillStyle = '#333333';
                     ctx.textAlign = 'left';
 
-                    const displayUsl = usl !== null ? usl.toFixed(3) : 'N/A';
-                    const displayNom = spec !== null ? spec.toFixed(3) : 'N/A';
-                    const displayLsl = lsl !== null ? lsl.toFixed(3) : 'N/A';
-                    const displayMean = mean.toFixed(4);
-                    const displayStd = stdDev.toFixed(4);
+                    const displayUsl = usl !== null ? usl.toFixed(1) : 'N/A';
+                    const displayNom = spec !== null ? spec.toFixed(1) : 'N/A';
+                    const displayLsl = lsl !== null ? lsl.toFixed(1) : 'N/A';
+                    const displayMean = mean.toFixed(3);
+                    const displayStd = stdDev.toFixed(3);
                     const displayCp = cp !== null ? cp.toFixed(3) : 'N/A';
                     const displayCpk = cpk !== null ? cpk.toFixed(3) : 'N/A';
 
-                    const row1Text = ` `;
-                    const row2Text = `USL: ${displayUsl}   |    Mean: ${displayMean}   |   DPMO (<LSL): ${dpmoLSL.toLocaleString()}/n
-                    Nominal: ${displayNom}   |   StDev: ${displayStd}   |   DPMO (>USL): ${dpmoUSL.toLocaleString()}/n
-                    LSL: ${displayLsl}   |   Cp: ${displayCp}   |   Cpk: ${displayCpk}`;
-                    // const row3Text = `Nominal: ${displayNom}   |   StDev: ${displayStd}   |   DPMO (>USL): ${dpmoUSL.toLocaleString()}`;
-                    // const row4Text = `LSL: ${displayLsl}   |   Cp: ${displayCp}   |   Cpk: ${displayCpk}`;
+                    const col1 = left;
+                    const col2 = left + 180;
+                    const col3 = left + 360;
 
-                    ctx.fillText(row1Text, left, bottom + 40);
-                    ctx.fillText(row2Text, left, bottom + 60);
-                    // ctx.fillText(row3Text, left, bottom + 120);
-                    // ctx.fillText(row4Text, left, bottom + 180);
+                    const lineHeight = 18;
+
+                    const rows = [
+                        [`USL: ${displayUsl}`, `Mean: ${displayMean}`, `DPMO (<LSL): ${dpmoLSL.toLocaleString()}`],
+                        [`Nominal: ${displayNom}`, `StDev: ${displayStd}`, `DPMO (>USL): ${dpmoUSL.toLocaleString()}`],
+                        [`LSL: ${displayLsl}`, `Cp: ${displayCp}`, `Cpk: ${displayCpk}`]
+                    ];
+
+                    rows.forEach((row, i) => {
+                        const y = bottom + 40 + i * lineHeight;
+
+                        ctx.fillText(row[0], col1, y);
+                        ctx.fillText("|", col2 - 15, y);
+
+                        ctx.fillText(row[1], col2, y);
+                        ctx.fillText("|", col3 - 15, y);
+
+                        ctx.fillText(row[2], col3, y);
+                    });
                     ctx.restore();
                 }
             };
@@ -688,6 +713,12 @@
                     plugins: {
                         legend: {
                             labels: {
+				boxWidth: 10,
+            			boxHeight: 10,
+            			padding: 12,
+            			font: {
+                			size: 12
+            			},
                                 filter: (item) => ['Normal Distribution', 'Actual Frequency', 'LSL', 'Target Spec', 'USL'].some(k => item.text.includes(k))
                             }
                         },
@@ -704,9 +735,9 @@
                     },
                     scales: {
                         x: {
-                            type: 'linear',
-                            position: 'bottom',
-                            title: { display: true, text: 'Measured Values' }
+                            //type: 'linear',
+                            //position: 'bottom',
+                            //title: { display: true, text: 'Measured Values' }
                         },
                         yFrequency: {
                             type: 'linear',
