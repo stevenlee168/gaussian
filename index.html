@@ -1,817 +1,865 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gaussian Bell Curve & Frequency Visualizer</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f7;
-            display: flex;
-            flex-direction: column;
-            height: 92vh;
-        }
-        .header {
-            margin-bottom: 15px;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
-            flex: 1;
-            min-height: 0;
-        }
-        .sidebar {
-            flex: 1.2;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            min-width: 430px;
-        }
-        .table-container {
-            flex: 1;
-            overflow: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            table-layout: fixed;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 6px 10px;
-            text-align: left;
-            min-width: 100px;
-        }
-        th {
-            background-color: #f3f3f3;
-            position: sticky;
-            top: 0;
-            font-weight: 600;
-            color: #444;
-            z-index: 10;
-            white-space: pre-line;
-        }
-        .row-index {
-            background-color: #f9f9f9;
-            text-align: center;
-            width: 70px;
-            min-width: 70px;
-            max-width: 70px;
-            color: #888;
-            user-select: none;
-            position: sticky;
-            left: 0;
-            z-index: 5;
-            border-right: 2px solid #ddd;
-            font-weight: bold;
-        }
-        .spec-row {
-            background-color: #fff9e6;
-            font-weight: bold;
-        }
-        .spec-row .row-index {
-            background-color: #ffeeba;
-            color: #856404;
-        }
-        th.row-index {
-            z-index: 15;
-        }
-        .editable-cell {
-            outline: none;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-        .editable-cell:focus {
-            background-color: #e8f0fe;
-            box-shadow: inset 0 0 0 2px #1a73e8;
-        }
-        .chart-window {
-            flex: 1.7;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-        }
-        .chart-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 15px 15px 5px 15px;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-        }
-        .export-controls {
-            display: flex;
-            gap: 8px;
-            margin: 0 15px 15px 15px;
-            padding: 0 10px;
-        }
-        .chart-container {
-            flex: 1;
-	    position: relative;
-            min-height: 0;
-            padding: 0 15px 75px 15px;
-        }
-        .controls {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: #fff;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 13px;
-            user-select: none;
-        }
-        button.primary {
-            background-color: #0071e3;
-            color: white;
-            border: none;
-        }
-        button.success {
-            background-color: #34a853;
-            color: white;
-            border: none;
-        }
-        button:hover:not(:disabled) {
-            opacity: 0.9;
-        }
-        button:disabled {
-            background-color: #f1f1f1;
-            color: #bbb;
-            cursor: not-allowed;
-            border-color: #ddd;
-        }
-        #currentColumnLabel {
-            font-weight: bold;
-            color: #333;
-            font-size: 15px;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 20px;
+        background-color: #f5f5f7;
+        display: flex;
+        flex-direction: column;
+        height: 92vh;
+      }
+
+      .header {
+        margin-bottom: 15px;
+      }
+
+      .container {
+        display: flex;
+        gap: 20px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .sidebar {
+        flex: 1.2;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-width: 430px;
+      }
+
+      .table-container {
+        flex: 1;
+        overflow: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        table-layout: fixed;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        text-align: left;
+        min-width: 100px;
+      }
+
+      th {
+        background-color: #f3f3f3;
+        position: sticky;
+        top: 0;
+        font-weight: 600;
+        color: #444;
+        z-index: 10;
+        white-space: pre-line;
+      }
+
+      .row-index {
+        background-color: #f9f9f9;
+        text-align: center;
+        width: 70px;
+        min-width: 70px;
+        max-width: 70px;
+        color: #888;
+        user-select: none;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+        border-right: 2px solid #ddd;
+        font-weight: bold;
+      }
+
+      .spec-row {
+        background-color: #fff9e6;
+        font-weight: bold;
+      }
+
+      .spec-row .row-index {
+        background-color: #ffeeba;
+        color: #856404;
+      }
+
+      th.row-index {
+        z-index: 15;
+      }
+
+      .editable-cell {
+        outline: none;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .editable-cell:focus {
+        background-color: #e8f0fe;
+        box-shadow: inset 0 0 0 2px #1a73e8;
+      }
+
+      .chart-window {
+        flex: 1.7;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chart-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 15px 15px 5px 15px;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+      }
+
+      .export-controls {
+        display: flex;
+        gap: 8px;
+        margin: 0 15px 15px 15px;
+        padding: 0 10px;
+      }
+
+      .chart-container {
+        flex: 1;
+        position: relative;
+        min-height: 0;
+        padding: 0 15px 75px 15px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 13px;
+        user-select: none;
+      }
+
+      button.primary {
+        background-color: #0071e3;
+        color: white;
+        border: none;
+      }
+
+      button.success {
+        background-color: #34a853;
+        color: white;
+        border: none;
+      }
+
+      button:hover:not(:disabled) {
+        opacity: 0.9;
+      }
+
+      button:disabled {
+        background-color: #f1f1f1;
+        color: #bbb;
+        cursor: not-allowed;
+        border-color: #ddd;
+      }
+
+      #currentColumnLabel {
+        font-weight: bold;
+        color: #333;
+        font-size: 15px;
+      }
     </style>
-</head>
-<body>
+  </head>
+
+  <body>
 
     <div class="header">
-        <h2>Gaussian Bell Curve & Process Capability Visualizer</h2>
+      <h2>Gaussian Bell Curve & Process Capability Visualizer</h2>
     </div>
 
     <div class="container">
-        <div class="sidebar">
-            <div class="controls">
-                <button id="addColBtn" class="primary">+ Add Column</button>
-                <button id="addRowBtn">+ Add Data Row</button>
-                <button id="clearBtn">Clear All</button>
-            </div>
-            
-            <div class="table-container">
-                <table id="excelGrid">
-                    <thead>
-                        <tr id="headerRow">
-                            <th class="row-index">#</th>
-                            <th class="col-header" contenteditable="true">Column 1</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gridBody">
-                    </tbody>
-                    <tfoot id="gridFoot">
-                        <tr class="spec-row" id="rowSpec">
-                            <td class="row-index">SPEC</td>
-                        </tr>
-                        <tr class="spec-row" id="rowLSL">
-                            <td class="row-index">LSL</td>
-                        </tr>
-                        <tr class="spec-row" id="rowUSL">
-                            <td class="row-index">USL</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+      <div class="sidebar">
+        <div class="controls">
+          <button id="addColBtn" class="primary">+ Add Column</button>
+          <button id="addRowBtn">+ Add Data Row</button>
+          <button id="clearBtn">Clear All</button>
         </div>
 
-        <div class="chart-window">
-            <div class="chart-controls">
-                <button id="prevChartBtn" disabled>&larr; Previous Column</button>
-                <span id="currentColumnLabel">Viewing: Column 1</span>
-                <button id="nextChartBtn" disabled>Next Column &rarr;</button>
-            </div>
-            
-            <div class="export-controls">
-                <button id="saveSingleBtn" class="success" disabled>⬇ Save Current Chart (PNG)</button>
-                <button id="saveAllBtn" class="success" disabled>⬇ Save All Charts (PNGs)</button>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="myChart"></canvas>
-            </div>
+        <div class="table-container">
+          <table id="excelGrid">
+            <thead>
+              <tr id="headerRow">
+                <th class="row-index">#</th>
+                <th class="col-header" contenteditable="true">Column 1</th>
+              </tr>
+            </thead>
+            <tbody id="gridBody">
+            </tbody>
+            <tfoot id="gridFoot">
+              <tr class="spec-row" id="rowSpec">
+                <td class="row-index">SPEC</td>
+              </tr>
+              <tr class="spec-row" id="rowLSL">
+                <td class="row-index">LSL</td>
+              </tr>
+              <tr class="spec-row" id="rowUSL">
+                <td class="row-index">USL</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
+      </div>
+
+      <div class="chart-window">
+        <div class="chart-controls">
+          <button id="prevChartBtn" disabled>&larr; Previous Column</button>
+          <span id="currentColumnLabel">Viewing: Column 1</span>
+          <button id="nextChartBtn" disabled>Next Column &rarr;</button>
+        </div>
+
+        <div class="export-controls">
+          <button id="saveSingleBtn" class="success" disabled>⬇ Save Current Chart (PNG)</button>
+          <button id="saveAllBtn" class="success" disabled>⬇ Save All Charts (PNGs)</button>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="myChart"></canvas>
+        </div>
+      </div>
     </div>
 
     <script>
-        const gridBody = document.getElementById('gridBody');
-        const headerRow = document.getElementById('headerRow');
-        
-        let currentChart = null;
-        let rowCount = 0;
-        let colCount = 1;
-        let activeColumnIndex = 0;
+      const gridBody = document.getElementById('gridBody');
+      const headerRow = document.getElementById('headerRow');
+      let currentChart = null;
+      let rowCount = 0;
+      let colCount = 1;
+      let activeColumnIndex = 0;
 
-        function errorFunction(x) {
-            const t = 1.0 / (1.0 + 0.5 * Math.abs(x));
-            const ans = 1.0 - t * Math.exp(-x * x - 1.26551223 +
-                t * (1.00002368 +
-                t * (0.37409196 +
-                t * (0.09678418 +
+      function errorFunction(x) {
+        const t = 1.0 / (1.0 + 0.5 * Math.abs(x));
+        const ans = 1.0 - t * Math.exp(-x * x - 1.26551223 +
+          t * (1.00002368 +
+            t * (0.37409196 +
+              t * (0.09678418 +
                 t * (-0.18628806 +
-                t * (0.27886807 +
-                t * (-1.13520398 +
-                t * (1.48851587 +
-                t * (-0.82215223 +
-                t * 0.17087277)))))))));
-            return x >= 0 ? ans : -ans;
-        }
+                  t * (0.27886807 +
+                    t * (-1.13520398 +
+                      t * (1.48851587 +
+                        t * (-0.82215223 +
+                          t * 0.17087277)))))))));
+        return x >= 0 ? ans : -ans;
+      }
 
-        function normalCDF(x, mean, stdDev) {
-            if (stdDev === 0) return x < mean ? 0 : 1;
-            return 0.5 * (1 + errorFunction((x - mean) / (stdDev * Math.sqrt(2))));
-        }
+      function normalCDF(x, mean, stdDev) {
+        if (stdDev === 0) return x < mean ? 0 : 1;
+        return 0.5 * (1 + errorFunction((x - mean) / (stdDev * Math.sqrt(2))));
+      }
+      // Setup the target listener correctly on setup and recreation loops
+      function bindHeaderInput() {
+        const currentHeaders = document.querySelectorAll('.col-header');
+        currentHeaders.forEach(th => {
+          th.removeEventListener('input', updateChart);
+          th.addEventListener('input', updateChart);
+        });
+      }
 
-        // Setup the target listener correctly on setup and recreation loops
-        function bindHeaderInput() {
-            const currentHeaders = document.querySelectorAll('.col-header');
-            currentHeaders.forEach(th => {
-                th.removeEventListener('input', updateChart);
-                th.addEventListener('input', updateChart);
+      function initGrid() {
+        gridBody.innerHTML = '';
+        rowCount = 0;
+        document.getElementById('rowSpec').innerHTML = '<td class="row-index">SPEC</td>';
+        document.getElementById('rowLSL').innerHTML = '<td class="row-index">LSL</td>';
+        document.getElementById('rowUSL').innerHTML = '<td class="row-index">USL</td>';
+        for (let i = 0; i < 15; i++) {
+          addDataRow();
+        }
+        for (let i = 0; i < colCount; i++) {
+          createSpecCell('rowSpec');
+          createSpecCell('rowLSL');
+          createSpecCell('rowUSL');
+        }
+        bindHeaderInput();
+        updateChart();
+      }
+
+      function addDataRow() {
+        rowCount++;
+        const tr = document.createElement('tr');
+        const tdIndex = document.createElement('td');
+        tdIndex.className = 'row-index';
+        tdIndex.textContent = rowCount;
+        tr.appendChild(tdIndex);
+        for (let i = 0; i < colCount; i++) {
+          createCell(tr);
+        }
+        gridBody.appendChild(tr);
+      }
+
+      function createCell(row) {
+        const td = document.createElement('td');
+        td.className = 'editable-cell';
+        td.contentEditable = true;
+        td.addEventListener('input', updateChart);
+        td.addEventListener('paste', handlePaste);
+        row.appendChild(td);
+      }
+
+      function createSpecCell(rowId) {
+        const row = document.getElementById(rowId);
+        const td = document.createElement('td');
+        td.className = 'editable-cell';
+        td.contentEditable = true;
+        td.addEventListener('input', updateChart);
+        td.addEventListener('paste', handlePaste);
+        row.appendChild(td);
+      }
+
+      function addColumn() {
+        colCount++;
+        const th = document.createElement('th');
+        th.className = 'col-header';
+        th.contentEditable = true;
+        th.textContent = `Column ${colCount}`;
+        headerRow.appendChild(th);
+        Array.from(gridBody.children).forEach(row => {
+          createCell(row);
+        });
+        createSpecCell('rowSpec');
+        createSpecCell('rowLSL');
+        createSpecCell('rowUSL');
+        bindHeaderInput();
+        activeColumnIndex = colCount - 1;
+        updateChart();
+      }
+
+      function handlePaste(e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text");
+        const currentCell = this;
+        const startCol = currentCell.cellIndex;
+        const parentRow = currentCell.parentElement;
+        const isFooter = parentRow.parentElement.tagName === "TFOOT";
+        //=========================================================
+        // Parse clipboard while preserving quoted multiline cells
+        //=========================================================
+        function parseClipboard(str) {
+          const rows = [];
+          let row = [];
+          let cell = "";
+          let inQuote = false;
+          for (let i = 0; i < str.length; i++) {
+            const ch = str[i];
+            if (ch === '"') {
+              inQuote = !inQuote;
+              continue;
+            }
+            if (ch === '\t' && !inQuote) {
+              row.push(cell);
+              cell = "";
+              continue;
+            }
+            if ((ch === '\n' || ch === '\r') && !inQuote) {
+              if (ch === '\r' && str[i + 1] === '\n')
+                i++;
+              row.push(cell);
+              rows.push(row);
+              row = [];
+              cell = "";
+              continue;
+            }
+            cell += ch;
+          }
+          row.push(cell);
+          rows.push(row);
+          return rows;
+        }
+        const data = parseClipboard(text);
+        //=========================================================
+        // BODY
+        //=========================================================
+        if (!isFooter) {
+          //-----------------------------------------------------
+          // First row becomes header if every cell has >1 line
+          //-----------------------------------------------------
+          if (data.length > 0) {
+            const firstRow = data[0];
+            let headerDetected = true;
+            firstRow.forEach(cell => {
+              if (!cell.includes("\n"))
+                headerDetected = false;
             });
-        }
-
-        function initGrid() {
-            gridBody.innerHTML = '';
-            rowCount = 0;
-            
-            document.getElementById('rowSpec').innerHTML = '<td class="row-index">SPEC</td>';
-            document.getElementById('rowLSL').innerHTML = '<td class="row-index">LSL</td>';
-            document.getElementById('rowUSL').innerHTML = '<td class="row-index">USL</td>';
-
-            for (let i = 0; i < 15; i++) {
-                addDataRow();
+            if (headerDetected) {
+              firstRow.forEach((header, c) => {
+                while (startCol + c > colCount)
+                  addColumn();
+                headerRow.cells[startCol + c].innerText = header.trim();
+              });
+              data.shift();
             }
-            for (let i = 0; i < colCount; i++) {
-                createSpecCell('rowSpec');
-                createSpecCell('rowLSL');
-                createSpecCell('rowUSL');
-            }
-            bindHeaderInput();
-            updateChart();
-        }
-
-        function addDataRow() {
-            rowCount++;
-            const tr = document.createElement('tr');
-            
-            const tdIndex = document.createElement('td');
-            tdIndex.className = 'row-index';
-            tdIndex.textContent = rowCount;
-            tr.appendChild(tdIndex);
-            
-            for (let i = 0; i < colCount; i++) {
-                createCell(tr);
-            }
-            
-            gridBody.appendChild(tr);
-        }
-
-        function createCell(row) {
-            const td = document.createElement('td');
-            td.className = 'editable-cell';
-            td.contentEditable = true;
-            td.addEventListener('input', updateChart);
-            td.addEventListener('paste', handlePaste);
-            row.appendChild(td);
-        }
-
-        function createSpecCell(rowId) {
-            const row = document.getElementById(rowId);
-            const td = document.createElement('td');
-            td.className = 'editable-cell';
-            td.contentEditable = true;
-            td.addEventListener('input', updateChart);
-            td.addEventListener('paste', handlePaste);
-            row.appendChild(td);
-        }
-
-        function addColumn() {
-            colCount++;
-            
-            const th = document.createElement('th');
-            th.className = 'col-header';
-            th.contentEditable = true;
-            th.textContent = `Column ${colCount}`;
-            headerRow.appendChild(th);
-            
-            Array.from(gridBody.children).forEach(row => {
-                createCell(row);
+          }
+          let startRow = parentRow.rowIndex - 1;
+          data.forEach((rowData, r) => {
+            while (startRow + r >= rowCount)
+              addDataRow();
+            const row = gridBody.rows[startRow + r];
+            rowData.forEach((value, c) => {
+              while (startCol + c > colCount)
+                addColumn();
+              row.cells[startCol + c].textContent = value.trim();
             });
-
-            createSpecCell('rowSpec');
-            createSpecCell('rowLSL');
-            createSpecCell('rowUSL');
-            
-            bindHeaderInput();
-            activeColumnIndex = colCount - 1;
-            updateChart();
+          });
+          activeColumnIndex = startCol - 1;
+          updateChart();
+          return;
         }
+        //=========================================================
+        // FOOTER
+        //=========================================================
+        const footerRows = ["rowSpec", "rowLSL", "rowUSL"];
+        const startFooter = footerRows.indexOf(parentRow.id);
+        data.forEach((rowData, r) => {
+          const footerIndex = startFooter + r;
+          if (footerIndex >= footerRows.length)
+            return;
+          const row = document.getElementById(footerRows[footerIndex]);
+          rowData.forEach((value, c) => {
+            while (startCol + c >= row.cells.length)
+              addColumn();
+            row.cells[startCol + c].textContent = value.trim();
+          });
+        });
+        updateChart();
+      }
 
-        function handlePaste(e) {
-            e.preventDefault();
-            let text = (e.clipboardData || window.clipboardData).getData('text');
-            
-            const currentCell = this;
-            const columnIndex = currentCell.cellIndex;
-            const parentRow = currentCell.parentElement;
-            const isFooter = parentRow.parentElement.tagName === 'TFOOT';
-
-            if (isFooter) {
-                const lines = text
-                    .split(/\r?\n/)
-                    .map(line => line.trim())
-                    .filter(line => line !== '');
-            
-                // Footer rows in order
-                const footerRows = ['rowSpec', 'rowLSL', 'rowUSL'];
-            
-                // Find where the paste started
-                const startIndex = footerRows.indexOf(parentRow.id);
-            
-                // Fill downward through the footer rows
-                for (let i = 0; i < lines.length && startIndex + i < footerRows.length; i++) {
-                    const row = document.getElementById(footerRows[startIndex + i]);
-                    row.cells[columnIndex].textContent = lines[i];
-                }
-            
-                updateChart();
-                return;
-            }
-
-            let remainingText = text;
-            const quoteRegex = /^"([^"]+)"\s*([\s\S]*)$/;
-            const match = text.trim().match(quoteRegex);
-
-            if (match) {
-                headerRow.cells[columnIndex].innerText = match[1];
-                remainingText = match[2]; 
-            }
-
-            let lines = remainingText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '');
-            let startRow = parentRow;
-
-            lines.forEach((line, index) => {
-                if (startRow) {
-                    startRow.cells[columnIndex].textContent = line;
-                    let nextRow = startRow.nextElementSibling;
-                    
-                    if (!nextRow && index < lines.length - 1) {
-                        addDataRow();
-                        nextRow = gridBody.lastElementChild;
-                    }
-                    startRow = nextRow;
-                }
-            });
-
-            activeColumnIndex = columnIndex - 1;
-            updateChart();
-        }
-
-        function getColumnStats(colIndex) {
-            const rows = Array.from(gridBody.children);
-            const rawData = [];
-
-            rows.forEach(row => {
-                const cell = row.cells[colIndex + 1];
-                if (cell) {
-                    const text = cell.textContent.trim();
-                    if (text !== '') {
-                        const val = Number(text);
-                        if (!isNaN(val)) rawData.push(val);
-                    }
-                }
-            });
-
-            const uslVal = parseSpecValue('rowUSL', colIndex);
-            const specVal = parseSpecValue('rowSpec', colIndex);
-            const lslVal = parseSpecValue('rowLSL', colIndex);
-
-            if (rawData.length === 0) return null;
-
-            const sum = rawData.reduce((a, b) => a + b, 0);
-            const mean = sum / rawData.length;
-
-            let stdDev = 0;
-            if (rawData.length > 1) {
-                const variance = rawData.reduce((sq, val) => sq + Math.pow(val - mean, 2), 0) / (rawData.length - 1);
-                stdDev = Math.sqrt(variance);
-            }
-
-            let cp = null;
-            let cpk = null;
-            let dpmoLSL = 0;
-            let dpmoUSL = 0;
-
-            if (stdDev > 0) {
-                if (lslVal !== null && uslVal !== null) {
-                    cp = (uslVal - lslVal) / (6 * stdDev);
-                }
-                
-                let cpu = (uslVal !== null) ? (uslVal - mean) / (3 * stdDev) : null;
-                let cpl = (lslVal !== null) ? (mean - lslVal) / (3 * stdDev) : null;
-                
-                if (cpu !== null && cpl !== null) cpk = Math.min(cpu, cpl);
-                else if (cpu !== null) cpk = cpu;
-                else if (cpl !== null) cpk = cpl;
-
-                if (lslVal !== null) {
-                    dpmoLSL = Math.round(normalCDF(lslVal, mean, stdDev) * 1000000);
-                }
-                if (uslVal !== null) {
-                    dpmoUSL = Math.round((1 - normalCDF(uslVal, mean, stdDev)) * 1000000);
-                }
-            }
-
-            return { 
-                rawData, mean, stdDev, 
-                usl: uslVal, spec: specVal, lsl: lslVal,
-                cp, cpk, dpmoLSL, dpmoUSL
-            };
-        }
-
-        function parseSpecValue(rowId, colIndex) {
-            const cell = document.getElementById(rowId).cells[colIndex + 1];
-            if (!cell) return null;
+      function getColumnStats(colIndex) {
+        const rows = Array.from(gridBody.children);
+        const rawData = [];
+        rows.forEach(row => {
+          const cell = row.cells[colIndex + 1];
+          if (cell) {
             const text = cell.textContent.trim();
-            if (text === '') return null;
-            const val = Number(text);
-            return isNaN(val) ? null : val;
+            if (text !== '') {
+              const val = Number(text);
+              if (!isNaN(val)) rawData.push(val);
+            }
+          }
+        });
+        const uslVal = parseSpecValue('rowUSL', colIndex);
+        const specVal = parseSpecValue('rowSpec', colIndex);
+        const lslVal = parseSpecValue('rowLSL', colIndex);
+        if (rawData.length === 0) return null;
+        const sum = rawData.reduce((a, b) => a + b, 0);
+        const mean = sum / rawData.length;
+        let stdDev = 0;
+        if (rawData.length > 1) {
+          const variance = rawData.reduce((sq, val) => sq + Math.pow(val - mean, 2), 0) / (rawData.length - 1);
+          stdDev = Math.sqrt(variance);
         }
-
-        function gaussianY(x, mean, stdDev) {
-            if (stdDev === 0) return 0;
-            const exponent = -0.5 * Math.pow((x - mean) / stdDev, 2);
-            return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+        let cp = null;
+        let cpk = null;
+        let dpmoLSL = 0;
+        let dpmoUSL = 0;
+        if (stdDev > 0) {
+          if (lslVal !== null && uslVal !== null) {
+            cp = (uslVal - lslVal) / (6 * stdDev);
+          }
+          let cpu = (uslVal !== null) ? (uslVal - mean) / (3 * stdDev) : null;
+          let cpl = (lslVal !== null) ? (mean - lslVal) / (3 * stdDev) : null;
+          if (cpu !== null && cpl !== null) cpk = Math.min(cpu, cpl);
+          else if (cpu !== null) cpk = cpu;
+          else if (cpl !== null) cpk = cpl;
+          if (lslVal !== null) {
+            dpmoLSL = Math.round(normalCDF(lslVal, mean, stdDev) * 1000000);
+          }
+          if (uslVal !== null) {
+            dpmoUSL = Math.round((1 - normalCDF(uslVal, mean, stdDev)) * 1000000);
+          }
         }
+        return {
+          rawData,
+          mean,
+          stdDev,
+          usl: uslVal,
+          spec: specVal,
+          lsl: lslVal,
+          cp,
+          cpk,
+          dpmoLSL,
+          dpmoUSL
+        };
+      }
 
-        function updateChart() {
-            const headers = Array.from(document.querySelectorAll('.col-header')).map(th => th.textContent || 'Value');
-            
-            if (activeColumnIndex >= colCount) activeColumnIndex = colCount - 1;
-            if (activeColumnIndex < 0) activeColumnIndex = 0;
+      function parseSpecValue(rowId, colIndex) {
+        const cell = document.getElementById(rowId).cells[colIndex + 1];
+        if (!cell) return null;
+        const text = cell.textContent.trim();
+        if (text === '') return null;
+        const val = Number(text);
+        return isNaN(val) ? null : val;
+      }
 
-            document.getElementById('prevChartBtn').disabled = (activeColumnIndex === 0);
-            document.getElementById('nextChartBtn').disabled = (activeColumnIndex === colCount - 1);
-            
-            const currentName = headers[activeColumnIndex];
-            document.getElementById('currentColumnLabel').textContent = `Viewing: ${currentName}`;
+      function gaussianY(x, mean, stdDev) {
+        if (stdDev === 0) return 0;
+        const exponent = -0.5 * Math.pow((x - mean) / stdDev, 2);
+        return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+      }
 
-            const stats = getColumnStats(activeColumnIndex);
-
-            if (currentChart) {
-                currentChart.destroy();
-                currentChart = null;
+      function updateChart() {
+        const headers = Array.from(document.querySelectorAll('.col-header')).map(th => th.textContent || 'Value');
+        if (activeColumnIndex >= colCount) activeColumnIndex = colCount - 1;
+        if (activeColumnIndex < 0) activeColumnIndex = 0;
+        document.getElementById('prevChartBtn').disabled = (activeColumnIndex === 0);
+        document.getElementById('nextChartBtn').disabled = (activeColumnIndex === colCount - 1);
+        const currentName = headers[activeColumnIndex];
+        document.getElementById('currentColumnLabel').textContent = `Viewing: ${currentName}`;
+        const stats = getColumnStats(activeColumnIndex);
+        if (currentChart) {
+          currentChart.destroy();
+          currentChart = null;
+        }
+        const noData = !stats;
+        document.getElementById('saveSingleBtn').disabled = noData;
+        document.getElementById('saveAllBtn').disabled = noData;
+        if (noData) return;
+        const {
+          rawData,
+          mean,
+          stdDev,
+          usl,
+          spec,
+          lsl,
+          cp,
+          cpk,
+          dpmoLSL,
+          dpmoUSL
+        } = stats;
+        // Determine the step-scaling size based on specification conditions
+        let rangeDelta = 0;
+        if (lsl === null || usl === null) {
+          // If a limit is missing, compute: 2 * min(|USL - NOM|, |LSL - NOM|)
+          const halfWidth = Math.min(
+            usl !== null ? Math.abs(usl - spec) : Infinity,
+            lsl !== null ? Math.abs(lsl - spec) : Infinity
+          );
+          rangeDelta = halfWidth === Infinity ? 0 : halfWidth * 2;
+        } else {
+          // Symmetrical spec-limit range: (USL - LSL)
+          rangeDelta = usl - lsl;
+        }
+        // 1. Generate the exact 21 thresholds (matching Excel's preprocessing array)
+        const binCount = 21;
+        const binThresholds = [];
+        for (let i = 0; i < binCount; i++) {
+          const k = -1.0 + (i * 0.1); // Steps cleanly from -1.0, -0.9 ... up to +1.0
+          const val = spec + (k * rangeDelta);
+          binThresholds.push(Number(val.toFixed(6)));
+        }
+        // 2. Perform Excel-equivalent FREQUENCY counting (<= threshold logic)
+        const binCounts = Array(binCount).fill(0);
+        let overflowCount = 0;
+        rawData.forEach(val => {
+          let placed = false;
+          for (let i = 0; i < binCount; i++) {
+            if (val <= binThresholds[i]) {
+              binCounts[i]++;
+              placed = true;
+              break;
             }
+          }
+          if (!placed) {
+            overflowCount++; // Captures elements strictly greater than the 21st threshold
+          }
+        });
+        // 3. Map thresholds into formal bin structures for Chart.js
+        const bins = binThresholds.map((threshold, i) => {
+          // const prevThreshold = i === 0 ? threshold - (rangeDelta * 0.1) : binThresholds[i - 1];
+          // const centerValue = (prevThreshold + threshold) / 2;
+          const centerValue = (threshold);
+          let specLabel = "";
+          if (i === 5) specLabel = " [LSL]";
+          else if (i === 10) specLabel = " [NOM]";
+          else if (i === 15) specLabel = " [USL]";
+          return {
+            threshold: threshold,
+            center: Number(centerValue.toFixed(4)),
+            count: binCounts[i],
+            label: `Bin #${i + 1}${specLabel}`
+          };
+        });
+        // Log the exact distribution count to your web console to verify against your sheet
+        console.log(`--- Excel FREQUENCY Output for ${currentName} ---`);
+        bins.forEach((bin) => {
+          console.log(`${bin.label} (<= ${bin.threshold.toFixed(4)}): Count = ${bin.count}`);
+        });
+        if (overflowCount > 0) {
+          console.log(`> Bin #21 Overflow (Values > ${binThresholds[20].toFixed(4)}): Count = ${overflowCount}`);
+        }
+        // Build charting boundaries based on your preprocessed bins
+        let minX = binThresholds[0];
+        let maxX = binThresholds[binThresholds.length - 1];
+        const barData = bins.map(b => ({
+          x: b.center,
+          y: b.count
+        }));
+        const pointsCount = 100;
+        const curveStep = (maxX - minX) / pointsCount;
+        const curveData = [];
+        for (let i = 0; i <= pointsCount; i++) {
+          const x = minX + (i * curveStep);
+          const y = gaussianY(x, mean, stdDev);
+          curveData.push({
+            x: Number(x.toFixed(4)),
+            y: y
+          });
+        }
+        const maxY = Math.max(...curveData.map(p => p.y)) || 1;
+        const datasets = [{
+            label: 'Actual Frequency',
+            data: barData,
+            type: 'bar',
+            backgroundColor: 'rgba(75, 192, 192, 0.4)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+            barPercentage: 0.95,
+            categoryPercentage: 0.95,
+            yAxisID: 'yFrequency'
+          },
+          {
+            label: 'Normal Distribution',
+            data: curveData,
+            type: 'line',
+            borderColor: 'rgba(26, 115, 232, 1)',
+            backgroundColor: 'rgba(26, 115, 232, 0.05)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            yAxisID: 'yDensity'
+          }
+        ];
 
-            const noData = !stats;
-            document.getElementById('saveSingleBtn').disabled = noData;
-            document.getElementById('saveAllBtn').disabled = noData;
-
-            if (noData) return;
-
-            const { rawData, mean, stdDev, usl, spec, lsl, cp, cpk, dpmoLSL, dpmoUSL } = stats;
-
-            // Determine the step-scaling size based on specification conditions
-            let rangeDelta = 0;
-            if (lsl === null || usl === null) {
-                // If a limit is missing, compute: 2 * min(|USL - NOM|, |LSL - NOM|)
-                const halfWidth = Math.min(
-                    usl !== null ? Math.abs(usl - spec) : Infinity,
-                    lsl !== null ? Math.abs(lsl - spec) : Infinity
-                );
-                rangeDelta = halfWidth === Infinity ? 0 : halfWidth * 2;
-            } else {
-                // Symmetrical spec-limit range: (USL - LSL)
-                rangeDelta = usl - lsl;
-            }
-
-            // 1. Generate the exact 21 thresholds (matching Excel's preprocessing array)
-            const binCount = 21;
-            const binThresholds = [];
-            for (let i = 0; i < binCount; i++) {
-                const k = -1.0 + (i * 0.1); // Steps cleanly from -1.0, -0.9 ... up to +1.0
-                const val = spec + (k * rangeDelta);
-                binThresholds.push(Number(val.toFixed(6)));
-            }
-
-            // 2. Perform Excel-equivalent FREQUENCY counting (<= threshold logic)
-            const binCounts = Array(binCount).fill(0);
-            let overflowCount = 0;
-
-            rawData.forEach(val => {
-                let placed = false;
-                for (let i = 0; i < binCount; i++) {
-                    if (val <= binThresholds[i]) {
-                        binCounts[i]++;
-                        placed = true;
-                        break;
-                    }
-                }
-                if (!placed) {
-                    overflowCount++; // Captures elements strictly greater than the 21st threshold
-                }
-            });
-
-            // 3. Map thresholds into formal bin structures for Chart.js
-            const bins = binThresholds.map((threshold, i) => {
-                // const prevThreshold = i === 0 ? threshold - (rangeDelta * 0.1) : binThresholds[i - 1];
-                // const centerValue = (prevThreshold + threshold) / 2;
-                const centerValue = (threshold);
-
-                let specLabel = "";
-                if (i === 5) specLabel = " [LSL]";
-                else if (i === 10) specLabel = " [NOM]";
-                else if (i === 15) specLabel = " [USL]";
-
-                return {
-                    threshold: threshold,
-                    center: Number(centerValue.toFixed(4)),
-                    count: binCounts[i],
-                    label: `Bin #${i + 1}${specLabel}`
-                };
-            });
-
-            // Log the exact distribution count to your web console to verify against your sheet
-            console.log(`--- Excel FREQUENCY Output for ${currentName} ---`);
-            bins.forEach((bin) => {
-                console.log(`${bin.label} (<= ${bin.threshold.toFixed(4)}): Count = ${bin.count}`);
-            });
-            if (overflowCount > 0) {
-                console.log(`> Bin #21 Overflow (Values > ${binThresholds[20].toFixed(4)}): Count = ${overflowCount}`);
-            }
-
-            // Build charting boundaries based on your preprocessed bins
-            let minX = binThresholds[0];
-            let maxX = binThresholds[binThresholds.length - 1];
-
-            const barData = bins.map(b => ({ x: b.center, y: b.count }));
-
-            const pointsCount = 100;
-            const curveStep = (maxX - minX) / pointsCount;
-            const curveData = [];
-
-            for (let i = 0; i <= pointsCount; i++) {
-                const x = minX + (i * curveStep);
-                const y = gaussianY(x, mean, stdDev);
-                curveData.push({ x: Number(x.toFixed(4)), y: y });
-            }
-
-            const maxY = Math.max(...curveData.map(p => p.y)) || 1;
-            
-            const datasets = [
-                {
-                    label: 'Actual Frequency',
-                    data: barData,
-                    type: 'bar',
-                    backgroundColor: 'rgba(75, 192, 192, 0.4)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    barPercentage: 0.95,
-                    categoryPercentage: 0.95,
-                    yAxisID: 'yFrequency'
-                },
-                {
-                    label: 'Normal Distribution',
-                    data: curveData,
-                    type: 'line',
-                    borderColor: 'rgba(26, 115, 232, 1)',
-                    backgroundColor: 'rgba(26, 115, 232, 0.05)',
-                    borderWidth: 2.5,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    yAxisID: 'yDensity'
-                }
+        function addVerticalLine(xVal, label, color, dash = []) {
+          if (xVal === null) return;
+          datasets.push({
+            label: label,
+            type: 'line',
+            data: [{
+                x: xVal,
+                y: 0
+              },
+              {
+                x: xVal,
+                y: maxY * 1.05
+              }
+            ],
+            borderColor: color,
+            borderWidth: 2,
+            borderDash: dash,
+            fill: false,
+            pointRadius: 0,
+            yAxisID: 'yDensity'
+          });
+        }
+        addVerticalLine(spec, `Target Spec (${spec})`, '#34a853');
+        addVerticalLine(lsl, `LSL (${lsl})`, '#d93025', [6, 6]);
+        addVerticalLine(usl, `USL (${usl})`, '#d93025', [6, 6]);
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const bottomMetricsPlugin = {
+          id: 'bottomMetrics',
+          afterDraw: (chart) => {
+            const {
+              ctx,
+              chartArea: {
+                left,
+                bottom
+              }
+            } = chart;
+            ctx.save();
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillStyle = '#333333';
+            ctx.textAlign = 'left';
+            const displayUsl = usl !== null ? usl.toFixed(3) : 'N/A';
+            const displayNom = spec !== null ? spec.toFixed(3) : 'N/A';
+            const displayLsl = lsl !== null ? lsl.toFixed(3) : 'N/A';
+            const displayMean = mean.toFixed(4);
+            const displayStd = stdDev.toFixed(4);
+            const displayCp = cp !== null ? cp.toFixed(3) : 'N/A';
+            const displayCpk = cpk !== null ? cpk.toFixed(3) : 'N/A';
+            const col1 = left;
+            const col2 = left + 180;
+            const col3 = left + 360;
+            const lineHeight = 18;
+            const rows = [
+              [`USL: ${displayUsl}`, `Mean: ${displayMean}`, `DPMO (<LSL): ${dpmoLSL.toLocaleString()}`],
+              [`Nominal: ${displayNom}`, `StDev: ${displayStd}`, `DPMO (>USL): ${dpmoUSL.toLocaleString()}`],
+              [`LSL: ${displayLsl}`, `Cp: ${displayCp}`, `Cpk: ${displayCpk}`]
             ];
-
-            function addVerticalLine(xVal, label, color, dash = []) {
-                if (xVal === null) return;
-                datasets.push({
-                    label: label,
-                    type: 'line',
-                    data: [
-                        { x: xVal, y: 0 },
-                        { x: xVal, y: maxY * 1.05 }
-                    ],
-                    borderColor: color,
-                    borderWidth: 2,
-                    borderDash: dash,
-                    fill: false,
-                    pointRadius: 0,
-                    yAxisID: 'yDensity'
-                });
-            }
-
-            addVerticalLine(spec, `Target Spec (${spec})`, '#34a853');
-            addVerticalLine(lsl, `LSL (${lsl})`, '#d93025', [6, 6]);
-            addVerticalLine(usl, `USL (${usl})`, '#d93025', [6, 6]);
-
-            const ctx = document.getElementById('myChart').getContext('2d');
-            
-            const bottomMetricsPlugin = {
-                id: 'bottomMetrics',
-                afterDraw: (chart) => {
-                    const { ctx, chartArea: { left, bottom } } = chart;
-                    ctx.save();
-                    
-                    ctx.font = 'bold 12px sans-serif';
-                    ctx.fillStyle = '#333333';
-                    ctx.textAlign = 'left';
-
-                    const displayUsl = usl !== null ? usl.toFixed(3) : 'N/A';
-                    const displayNom = spec !== null ? spec.toFixed(3) : 'N/A';
-                    const displayLsl = lsl !== null ? lsl.toFixed(3) : 'N/A';
-                    const displayMean = mean.toFixed(4);
-                    const displayStd = stdDev.toFixed(4);
-                    const displayCp = cp !== null ? cp.toFixed(3) : 'N/A';
-                    const displayCpk = cpk !== null ? cpk.toFixed(3) : 'N/A';
-		    const col1 = left;
-                    const col2 = left + 180;
-                    const col3 = left + 360;
-
-                    const lineHeight = 18;
-
-                    const rows = [
-                        [`USL: ${displayUsl}`, `Mean: ${displayMean}`, `DPMO (<LSL): ${dpmoLSL.toLocaleString()}`],
-                        [`Nominal: ${displayNom}`, `StDev: ${displayStd}`, `DPMO (>USL): ${dpmoUSL.toLocaleString()}`],
-                        [`LSL: ${displayLsl}`, `Cp: ${displayCp}`, `Cpk: ${displayCpk}`]
-                    ];
-
-                    rows.forEach((row, i) => {
-                        const y = bottom + 40 + i * lineHeight;
-
-                        ctx.fillText(row[0], col1, y);
-                        ctx.fillText("|", col2 - 15, y);
-
-                        ctx.fillText(row[1], col2, y);
-                        ctx.fillText("|", col3 - 15, y);
-
-                        ctx.fillText(row[2], col3, y);
-                    });
-                    ctx.restore();
-                }
-            };
-
-            currentChart = new Chart(ctx, {
-                data: { datasets: datasets },
-                plugins: [bottomMetricsPlugin],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: { duration: 0 },
-                    layout: {
-                        padding: {
-                            bottom: 45
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-				boxWidth: 10,
-            			boxHeight: 10,
-            			padding: 12,
-            			font: {
-                			size: 12
-            			},
-                                filter: (item) => ['Normal Distribution', 'Actual Frequency', 'LSL', 'Target Spec', 'USL'].some(k => item.text.includes(k))
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                title: (items) => `Value context: ${items[0].parsed.x}`,
-                                label: (item) => {
-                                    if (item.dataset.type === 'bar') return `Count: ${item.parsed.y} items`;
-                                    if (item.datasetIndex === 1) return `Density: ${item.parsed.y.toFixed(5)}`;
-                                    return item.dataset.label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            //type: 'linear',
-                            //position: 'bottom',
-                            //title: { display: true, text: 'Measured Values' }
-                        },
-                        yFrequency: {
-                            type: 'linear',
-                            position: 'left',
-                            beginAtZero: true,
-                            title: { display: true, text: 'Frequency (Count)' },
-                            ticks: { precision: 0 }
-                        },
-                        yDensity: {
-                            type: 'linear',
-                            position: 'right',
-                            beginAtZero: true,
-                            title: { display: true, text: 'Probability Density' },
-                            grid: { drawOnChartArea: false }
-                        }
-                    }
-                }
+            rows.forEach((row, i) => {
+              const y = bottom + 40 + i * lineHeight;
+              ctx.fillText(row[0], col1, y);
+              ctx.fillText("|", col2 - 15, y);
+              ctx.fillText(row[1], col2, y);
+              ctx.fillText("|", col3 - 15, y);
+              ctx.fillText(row[2], col3, y);
             });
-        }
-
-        function downloadURI(uri, name) {
-            const link = document.createElement("a");
-            link.download = name;
-            link.href = uri;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function saveCurrentChart() {
-            if (!currentChart) return;
-            const canvas = document.getElementById('myChart');
-            const headers = Array.from(document.querySelectorAll('.col-header')).map(th => th.textContent.trim() || `Column_${activeColumnIndex + 1}`);
-            const fileName = `${headers[activeColumnIndex].replace(/[^a-z0-9]/gi, '_')}_CapabilityAnalysis.png`;
-            const dataURL = canvas.toDataURL('image/png');
-            downloadURI(dataURL, fileName);
-        }
-
-        async function saveAllCharts() {
-            const headers = Array.from(document.querySelectorAll('.col-header')).map(th => th.textContent.trim() || 'Column');
-            const originalIndex = activeColumnIndex;
-
-            for (let i = 0; i < colCount; i++) {
-                const stats = getColumnStats(i);
-                if (!stats) continue;
-
-                activeColumnIndex = i;
-                updateChart();
-                
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                const canvas = document.getElementById('myChart');
-                const cleanFileName = `${headers[i].replace(/[^a-z0-9]/gi, '_')}_CapabilityAnalysis.png`;
-                const dataURL = canvas.toDataURL('image/png');
-                downloadURI(dataURL, cleanFileName);
+            ctx.restore();
+          }
+        };
+        currentChart = new Chart(ctx, {
+          data: {
+            datasets: datasets
+          },
+          plugins: [bottomMetricsPlugin],
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+              duration: 0
+            },
+            layout: {
+              padding: {
+                bottom: 45
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  boxWidth: 10,
+                  boxHeight: 10,
+                  padding: 12,
+                  font: {
+                    size: 12
+                  },
+                  filter: (item) => ['Normal Distribution', 'Actual Frequency', 'LSL', 'Target Spec', 'USL'].some(k => item.text.includes(k))
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  title: (items) => `Value context: ${items[0].parsed.x}`,
+                  label: (item) => {
+                    if (item.dataset.type === 'bar') return `Count: ${item.parsed.y} items`;
+                    if (item.datasetIndex === 1) return `Density: ${item.parsed.y.toFixed(5)}`;
+                    return item.dataset.label;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                type: 'linear',
+                position: 'bottom',
+                //title: { display: true, text: 'Measured Values' }
+              },
+              yFrequency: {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Frequency (Count)'
+                },
+                ticks: {
+                  precision: 0
+                }
+              },
+              yDensity: {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Probability Density'
+                },
+                grid: {
+                  drawOnChartArea: false
+                }
+              }
             }
+          }
+        });
+      }
 
-            activeColumnIndex = originalIndex;
-            updateChart();
+      function downloadURI(uri, name) {
+        const link = document.createElement("a");
+        link.download = name;
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      function saveCurrentChart() {
+        if (!currentChart) return;
+        const canvas = document.getElementById('myChart');
+        const headers = Array.from(document.querySelectorAll('.col-header')).map(th => th.textContent.trim() || `Column_${activeColumnIndex + 1}`);
+        const fileName = `${headers[activeColumnIndex].replace(/[^a-z0-9]/gi, '_')}_CapabilityAnalysis.png`;
+        const dataURL = canvas.toDataURL('image/png');
+        downloadURI(dataURL, fileName);
+      }
+      async function saveAllCharts() {
+        const headers = Array.from(document.querySelectorAll('.col-header')).map(th => th.textContent.trim() || 'Column');
+        const originalIndex = activeColumnIndex;
+        for (let i = 0; i < colCount; i++) {
+          const stats = getColumnStats(i);
+          if (!stats) continue;
+          activeColumnIndex = i;
+          updateChart();
+          await new Promise(resolve => setTimeout(resolve, 100));
+          const canvas = document.getElementById('myChart');
+          const cleanFileName = `${headers[i].replace(/[^a-z0-9]/gi, '_')}_CapabilityAnalysis.png`;
+          const dataURL = canvas.toDataURL('image/png');
+          downloadURI(dataURL, cleanFileName);
         }
-
-        document.getElementById('prevChartBtn').addEventListener('click', () => {
-            if (activeColumnIndex > 0) {
-                activeColumnIndex--;
-                updateChart();
-            }
-        });
-
-        document.getElementById('nextChartBtn').addEventListener('click', () => {
-            if (activeColumnIndex < colCount - 1) {
-                activeColumnIndex++;
-                updateChart();
-            }
-        });
-
-        document.getElementById('addRowBtn').addEventListener('click', addDataRow);
-        document.getElementById('addColBtn').addEventListener('click', addColumn);
-        document.getElementById('saveSingleBtn').addEventListener('click', saveCurrentChart);
-        document.getElementById('saveAllBtn').addEventListener('click', saveAllCharts);
-
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            headerRow.innerHTML = '<th class="row-index">#</th><th class="col-header" contenteditable="true">Column 1</th>';
-            colCount = 1;
-            activeColumnIndex = 0;
-            initGrid();
-        });
-
+        activeColumnIndex = originalIndex;
+        updateChart();
+      }
+      document.getElementById('prevChartBtn').addEventListener('click', () => {
+        if (activeColumnIndex > 0) {
+          activeColumnIndex--;
+          updateChart();
+        }
+      });
+      document.getElementById('nextChartBtn').addEventListener('click', () => {
+        if (activeColumnIndex < colCount - 1) {
+          activeColumnIndex++;
+          updateChart();
+        }
+      });
+      document.getElementById('addRowBtn').addEventListener('click', addDataRow);
+      document.getElementById('addColBtn').addEventListener('click', addColumn);
+      document.getElementById('saveSingleBtn').addEventListener('click', saveCurrentChart);
+      document.getElementById('saveAllBtn').addEventListener('click', saveAllCharts);
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        headerRow.innerHTML = '<th class="row-index">#</th><th class="col-header" contenteditable="true">Column 1</th>';
+        colCount = 1;
+        activeColumnIndex = 0;
         initGrid();
+      });
+      initGrid();
     </script>
-</body>
+  </body>
+
 </html>
