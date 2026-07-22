@@ -32,7 +32,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            min-width: 400px;
+            min-width: 430px;
         }
         .table-container {
             flex: 1;
@@ -96,7 +96,7 @@
             box-shadow: inset 0 0 0 2px #1a73e8;
         }
         .chart-window {
-            flex: 2;
+            flex: 1.7;
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -201,7 +201,7 @@
                         <tr class="spec-row" id="rowUSL">
                             <td class="row-index">USL</td>
                         </tr>
-                    </tbody>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -349,8 +349,23 @@
             const isFooter = parentRow.parentElement.tagName === 'TFOOT';
 
             if (isFooter) {
-                let lines = text.split(/\r?\n/);
-                currentCell.textContent = lines[0] ? lines[0].trim() : '';
+                const lines = text
+                    .split(/\r?\n/)
+                    .map(line => line.trim())
+                    .filter(line => line !== '');
+            
+                // Footer rows in order
+                const footerRows = ['rowSpec', 'rowLSL', 'rowUSL'];
+            
+                // Find where the paste started
+                const startIndex = footerRows.indexOf(parentRow.id);
+            
+                // Fill downward through the footer rows
+                for (let i = 0; i < lines.length && startIndex + i < footerRows.length; i++) {
+                    const row = document.getElementById(footerRows[startIndex + i]);
+                    row.cells[columnIndex].textContent = lines[i];
+                }
+            
                 updateChart();
                 return;
             }
