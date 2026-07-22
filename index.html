@@ -650,15 +650,14 @@
                     ctx.fillStyle = '#333333';
                     ctx.textAlign = 'left';
 
-                    const displayUsl = usl !== null ? usl.toFixed(1) : 'N/A';
-                    const displayNom = spec !== null ? spec.toFixed(1) : 'N/A';
-                    const displayLsl = lsl !== null ? lsl.toFixed(1) : 'N/A';
-                    const displayMean = mean.toFixed(3);
-                    const displayStd = stdDev.toFixed(3);
+                    const displayUsl = usl !== null ? usl.toFixed(3) : 'N/A';
+                    const displayNom = spec !== null ? spec.toFixed(3) : 'N/A';
+                    const displayLsl = lsl !== null ? lsl.toFixed(3) : 'N/A';
+                    const displayMean = mean.toFixed(4);
+                    const displayStd = stdDev.toFixed(4);
                     const displayCp = cp !== null ? cp.toFixed(3) : 'N/A';
                     const displayCpk = cpk !== null ? cpk.toFixed(3) : 'N/A';
-
-                    const col1 = left;
+		    const col1 = left;
                     const col2 = left + 180;
                     const col3 = left + 360;
 
