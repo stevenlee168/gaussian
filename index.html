@@ -379,36 +379,23 @@
                 remainingText = match[2]; 
             }
 
-            // Parse clipboard as a 2D table (rows × columns)
-            const rows = remainingText
-                .trim()
-                .split(/\r?\n/)
-                .map(row => row.split('\t'));
-            
-            const startRowIndex = parentRow.rowIndex - 1; // subtract header row
-            const startColIndex = columnIndex;
+            let lines = remainingText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '');
+            let startRow = parentRow;
 
-            const requiredColumns = startColIndex + rows[0].length - 1;
-            // Add columns if necessary
-            while (requiredColumns > colCount) {
-                addColumn();
-            }
-            
-            // Add rows if necessary
-            while (startRowIndex + rows.length > rowCount) {
-                addDataRow();
-            }
-            
-            // Paste values
-            rows.forEach((rowData, r) => {
-                const targetRow = gridBody.rows[startRowIndex + r];
-            
-                rowData.forEach((value, c) => {
-                    targetRow.cells[startColIndex + c].textContent = value.trim();
-                });
+            lines.forEach((line, index) => {
+                if (startRow) {
+                    startRow.cells[columnIndex].textContent = line;
+                    let nextRow = startRow.nextElementSibling;
+                    
+                    if (!nextRow && index < lines.length - 1) {
+                        addDataRow();
+                        nextRow = gridBody.lastElementChild;
+                    }
+                    startRow = nextRow;
+                }
             });
-            
-            activeColumnIndex = startColIndex - 1;
+
+            activeColumnIndex = columnIndex - 1;
             updateChart();
         }
 
