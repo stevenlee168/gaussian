@@ -201,24 +201,20 @@
             }
         </style>
     </head>
-
     <body>
         <div class="header">
             <h2>Gaussian Bell Curve & Process Capability Visualizer</h2>
         </div>
-
         <div class="container">
             <div class="sidebar">
                 <div class="controls">
-                    <button id="addColBtn" class="primary">+ Add Column</button>
-                    <button id="addRowBtn">+ Add Data Row</button>
-                    <button id="clearBtn">Clear All</button>
-                    <button id="importExcelBtn">📂 Import Excel</button>
-                    <select id="sheetSelect" disabled>
+                    <button id="addColBtn" class="primary">+ Add Column</button
+                    ><button id="addRowBtn">+ Add Data Row</button><button id="clearBtn">Clear All</button
+                    ><button id="importExcelBtn">📂 Import Excel</button
+                    ><select id="sheetSelect" disabled>
                         <option>No file</option>
                     </select>
                 </div>
-
                 <div class="table-container">
                     <table id="excelGrid">
                         <thead>
@@ -242,26 +238,28 @@
                     </table>
                 </div>
             </div>
-
             <div class="chart-window">
                 <div class="chart-controls">
-                    <button id="prevChartBtn" disabled>&larr; Previous Column</button>
-                    <span id="currentColumnLabel">Viewing: Column 1</span>
-                    <button id="nextChartBtn" disabled>Next Column &rarr;</button>
+                    <label>
+                        Mode:
+                        <select id="chartMode">
+                            <option value="gaussian" selected>Gaussian</option>
+                            <option value="trending">Trending</option>
+                            <option value="errorbar">Error Bar</option>
+                        </select></label
+                    ><button id="prevChartBtn" disabled>&larr; Previous Column</button
+                    ><span id="currentColumnLabel">Viewing: Column 1</span
+                    ><button id="nextChartBtn" disabled>Next Column &rarr;</button>
                 </div>
-
                 <div class="export-controls">
-                    <button id="saveSingleBtn" class="success" disabled>⬇ Save Current Chart (png)</button>
-                    <button id="saveAllBtn" class="success" disabled>⬇ Save All Charts (pngs)</button>
+                    <button id="saveSingleBtn" class="success" disabled>⬇ Save Current Chart (png)</button
+                    ><button id="saveAllBtn" class="success" disabled>⬇ Save All Charts (pngs)</button>
                 </div>
-
-                <div class="chart-container">
-                    <canvas id="myChart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="myChart"></canvas></div>
             </div>
         </div>
-
         <script>
+            let currentSheetName = "";
             const gridBody = document.getElementById("gridBody");
             const headerRow = document.getElementById("headerRow");
             let currentChart = null;
@@ -269,7 +267,6 @@
             let colCount = 1;
             let activeColumnIndex = 0;
             let workbook = null;
-
             // Hidden file selector
             const excelFileInput = document.createElement("input");
             excelFileInput.type = "file";
@@ -313,9 +310,7 @@
 
             function format2Decimals(value) {
                 const num = Number(value);
-
                 if (isNaN(num)) return value;
-
                 return num.toFixed(2);
             }
             // Setup the target listener correctly on setup and recreation loops
@@ -360,43 +355,31 @@
 
             function createCell(row) {
                 const td = document.createElement("td");
-
                 td.className = "editable-cell";
                 td.contentEditable = true;
-
                 td.addEventListener("blur", function () {
                     const text = this.textContent.trim();
-
                     if (text !== "") this.textContent = format2Decimals(text);
-
                     updateChart();
                 });
-
                 td.addEventListener("paste", handlePaste);
-
                 row.appendChild(td);
             }
 
             function createSpecCell(rowId) {
                 const row = document.getElementById(rowId);
-
                 const td = document.createElement("td");
-
                 td.className = "editable-cell";
                 td.contentEditable = true;
-
                 td.addEventListener("blur", function () {
                     const text = this.textContent.trim();
-
                     if (text !== "") this.textContent = format2Decimals(text);
-
                     updateChart();
                 });
-
                 td.addEventListener("paste", handlePaste);
-
                 row.appendChild(td);
             }
+
             function addColumn() {
                 colCount++;
                 const th = document.createElement("th");
@@ -465,21 +448,16 @@
                     //-----------------------------------------------------
                     if (data.length > 0) {
                         const firstRow = data[0];
-
                         const headerDetected = firstRow.some((cell) => {
                             const text = cell.trim();
-
                             // If it isn't a valid number, treat it as a header
                             return text !== "" && isNaN(Number(text));
                         });
-
                         if (headerDetected) {
                             firstRow.forEach((header, c) => {
                                 while (startCol + c > colCount) addColumn();
-
                                 headerRow.cells[startCol + c].innerText = header.trim();
                             });
-
                             data.shift();
                         }
                     }
@@ -490,7 +468,6 @@
                         rowData.forEach((value, c) => {
                             while (startCol + c > colCount) addColumn();
                             const text = value.trim();
-
                             row.cells[startCol + c].textContent = text === "" ? "" : format2Decimals(text);
                         });
                     });
@@ -510,7 +487,6 @@
                     rowData.forEach((value, c) => {
                         while (startCol + c >= row.cells.length) addColumn();
                         const text = value.trim();
-
                         row.cells[startCol + c].textContent = text === "" ? "" : format2Decimals(text);
                     });
                 });
@@ -593,115 +569,122 @@
 
             function importExcel(file) {
                 const reader = new FileReader();
-
                 reader.onload = function (e) {
                     workbook = XLSX.read(e.target.result, {
                         type: "array",
                     });
-
                     const sheetSelect = document.getElementById("sheetSelect");
-
                     sheetSelect.innerHTML = "";
-
                     workbook.SheetNames.forEach((name) => {
                         const option = document.createElement("option");
-
                         option.value = name;
                         option.textContent = name;
-
                         sheetSelect.appendChild(option);
                     });
-
                     sheetSelect.disabled = false;
-
                     loadSheet(workbook.SheetNames[0]);
                 };
-
                 reader.readAsArrayBuffer(file);
             }
 
             function loadSheet(sheetName) {
                 const sheet = workbook.Sheets[sheetName];
-
+                currentSheetName = sheetName;
                 const rows = XLSX.utils.sheet_to_json(sheet, {
                     header: 1,
                     raw: true,
                 });
-
                 const TITLE_ROW = 4;
                 const SPEC_ROW = 55;
                 const LSL_ROW = 56;
                 const USL_ROW = 57;
                 const START_COL = 2;
-
                 let lastCol = START_COL;
-
                 while (rows[TITLE_ROW] && rows[TITLE_ROW][lastCol] !== undefined && rows[TITLE_ROW][lastCol] !== "") {
                     lastCol++;
                 }
-
                 const totalCols = lastCol - START_COL;
-
                 headerRow.innerHTML =
                     '<th class="row-index">#</th><th class="col-header" contenteditable="true">Column 1</th>';
-
                 colCount = 1;
                 activeColumnIndex = 0;
-
                 initGrid();
-
                 while (colCount < totalCols) addColumn();
-
                 for (let c = 0; c < totalCols; c++) {
                     headerRow.cells[c + 1].textContent = rows[TITLE_ROW][START_COL + c] || `Column ${c + 1}`;
                 }
-
                 const DATA_START = 5;
                 const DATA_END = 54;
-
                 while (rowCount < DATA_END - DATA_START + 1) addDataRow();
-
                 for (let r = DATA_START; r <= DATA_END; r++) {
                     for (let c = 0; c < totalCols; c++) {
                         const value = rows[r]?.[START_COL + c];
-
                         if (value !== undefined && value !== null)
                             gridBody.rows[r - DATA_START].cells[c + 1].textContent =
                                 value === "" || value == null ? "" : format2Decimals(value);
                     }
                 }
-
                 for (let c = 0; c < totalCols; c++) {
                     const spec = rows[SPEC_ROW]?.[START_COL + c];
-
                     document.getElementById("rowSpec").cells[c + 1].textContent =
                         spec == null || spec === "" ? "" : format2Decimals(spec);
-
                     const lsl = rows[LSL_ROW]?.[START_COL + c];
-
                     document.getElementById("rowLSL").cells[c + 1].textContent =
                         lsl == null || lsl === "" ? "" : format2Decimals(lsl);
-
                     const usl = rows[USL_ROW]?.[START_COL + c];
-
                     document.getElementById("rowUSL").cells[c + 1].textContent =
                         usl == null || usl === "" ? "" : format2Decimals(usl);
                 }
-
                 bindHeaderInput();
                 updateChart();
             }
 
             function updateChart() {
+                const mode = document.getElementById("chartMode").value;
+                const saveAllBtn = document.getElementById("saveAllBtn");
+                if (mode === "trending") {
+                    saveAllBtn.disabled = true;
+                } else if (mode === "errorbar") {
+                    saveAllBtn.disabled = true;
+                } else {
+                    saveAllBtn.disabled = false;
+                }
                 const headers = Array.from(document.querySelectorAll(".col-header")).map(
                     (th) => th.textContent || "Value"
                 );
                 if (activeColumnIndex >= colCount) activeColumnIndex = colCount - 1;
                 if (activeColumnIndex < 0) activeColumnIndex = 0;
-                document.getElementById("prevChartBtn").disabled = activeColumnIndex === 0;
-                document.getElementById("nextChartBtn").disabled = activeColumnIndex === colCount - 1;
+                const prevBtn = document.getElementById("prevChartBtn");
+                const nextBtn = document.getElementById("nextChartBtn");
+                if (mode === "trending") {
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                } else if (mode === "errorbar") {
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                } else {
+                    prevBtn.disabled = activeColumnIndex === 0;
+                    nextBtn.disabled = activeColumnIndex === colCount - 1;
+                }
                 const currentName = headers[activeColumnIndex];
-                document.getElementById("currentColumnLabel").textContent = `Viewing: ${currentName}`;
+                if (mode === "trending") {
+                    document.getElementById("currentColumnLabel").textContent =
+                        `Viewing: ${currentSheetName || "Trending"}`;
+                } else if (mode === "errorbar") {
+                    document.getElementById("currentColumnLabel").textContent =
+                        `Viewing: ${currentSheetName || "Distribution"}`;
+                } else {
+                    document.getElementById("currentColumnLabel").textContent = `Viewing: ${currentName}`;
+                }
+                if (mode === "trending") {
+                    drawTrending(headers);
+                    return;
+                }
+                if (mode === "errorbar") {
+                    drawErrorBar(headers);
+                    return;
+                }
+                // Gaussian mode
                 const stats = getColumnStats(activeColumnIndex);
                 if (currentChart) {
                     currentChart.destroy();
@@ -709,7 +692,7 @@
                 }
                 const noData = !stats;
                 document.getElementById("saveSingleBtn").disabled = noData;
-                document.getElementById("saveAllBtn").disabled = noData;
+                document.getElementById("saveAllBtn").disabled = noData || mode === "trending";
                 if (noData) return;
                 const { rawData, mean, stdDev, usl, spec, lsl, cp, cpk, dpmoLSL, dpmoUSL } = stats;
                 // Determine the step-scaling size based on specification conditions
@@ -849,10 +832,8 @@
                 const ctx = document.getElementById("myChart").getContext("2d");
                 const whiteBackgroundPlugin = {
                     id: "whiteBackground",
-
                     beforeDraw(chart) {
                         const { ctx, width, height } = chart;
-
                         ctx.save();
                         ctx.globalCompositeOperation = "destination-over";
                         ctx.fillStyle = "#ffffff";
@@ -991,6 +972,314 @@
                 });
             }
 
+            function drawTrending() {
+                if (currentChart) {
+                    currentChart.destroy();
+                    currentChart = null;
+                }
+                const labels = [];
+                const averages = [];
+                const specs = [];
+                const lsls = [];
+                const usls = [];
+                for (let c = 0; c < colCount; c++) {
+                    const stats = getColumnStats(c);
+                    if (!stats) continue;
+                    labels.push(headerRow.cells[c + 1].textContent.trim() || `Column ${c + 1}`);
+                    averages.push(stats.mean);
+                    specs.push(stats.spec);
+                    lsls.push(stats.lsl);
+                    usls.push(stats.usl);
+                }
+                const ctx = document.getElementById("myChart").getContext("2d");
+                currentChart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels,
+                        datasets: [
+                            // Average
+                            {
+                                label: "Average",
+                                data: averages,
+                                borderColor: "green",
+                                backgroundColor: "green",
+                                borderWidth: 3,
+                                fill: false,
+                                tension: 0.0,
+                                pointRadius: 5,
+                            },
+                            // SPEC
+                            {
+                                label: "SPEC",
+                                data: specs,
+                                borderColor: "black",
+                                borderWidth: 2,
+                                borderDash: [8, 6],
+                                pointRadius: 0,
+                                fill: false,
+                            },
+                            // USL
+                            {
+                                label: "USL",
+                                data: usls,
+                                borderColor: "red",
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: false,
+                            },
+                            // LSL
+                            {
+                                label: "LSL",
+                                data: lsls,
+                                borderColor: "blue",
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: false,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: currentSheetName ? `${currentSheetName} - Trending` : "Trending Chart",
+                            },
+                        },
+                        scales: {
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: "Average",
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+
+            function drawErrorBar() {
+
+    if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
+    }
+
+    const labels = [];
+    const means = [];
+    const lsls = [];
+    const specs = [];
+    const usls = [];
+
+    // One dataset for ALL measurements
+    const measurementData = [];
+
+    for (let c = 0; c < colCount; c++) {
+
+        const stats = getColumnStats(c);
+
+        if (!stats) continue;
+
+        const label = headerRow.cells[c + 1].textContent.trim() || `Column ${c + 1}`;
+
+        labels.push(label);
+
+        means.push(stats.mean);
+        lsls.push(stats.lsl);
+        specs.push(stats.spec);
+        usls.push(stats.usl);
+
+        // Add every measured point
+        stats.rawData.forEach(value => {
+
+            measurementData.push({
+                x: label,
+                y: value
+            });
+
+        });
+
+    }
+
+    const ctx = document.getElementById("myChart").getContext("2d");
+
+    currentChart = new Chart(ctx, {
+
+        type: "line",
+
+        data: {
+
+            labels,
+
+            datasets: [
+
+                // All measured points
+                {
+                    label: "Measurements",
+                    type: "scatter",
+
+                    data: measurementData,
+
+                    showLine: false,
+
+                    pointRadius: 3,
+
+                    pointHoverRadius: 5,
+
+                    pointBackgroundColor: "rgba(120,220,120,0.45)",
+
+                    pointBorderColor: "rgba(120,220,120,0.45)",
+
+                    order: 1
+                },
+
+                // Average
+                {
+                    label: "Average",
+
+                    data: means,
+
+                    showLine: false,
+
+                    pointRadius: 5,
+
+                    pointHoverRadius: 7,
+
+                    pointBackgroundColor: "green",
+
+                    pointBorderColor: "green",
+
+                    order: 2
+                },
+
+                // SPEC
+                {
+                    label: "SPEC",
+
+                    data: specs,
+
+                    showLine: false,
+
+                    pointStyle: "line",
+
+                    pointRadius: 14,
+
+                    pointBorderWidth: 3,
+
+                    pointBorderColor: "black",
+
+                    order: 3
+                },
+
+                // LSL
+                {
+                    label: "LSL",
+
+                    data: lsls,
+
+                    showLine: false,
+
+                    pointStyle: "line",
+
+                    pointRadius: 14,
+
+                    pointBorderWidth: 3,
+
+                    pointBorderColor: "blue",
+
+                    order: 3
+                },
+
+                // USL
+                {
+                    label: "USL",
+
+                    data: usls,
+
+                    showLine: false,
+
+                    pointStyle: "line",
+
+                    pointRadius: 14,
+
+                    pointBorderWidth: 3,
+
+                    pointBorderColor: "red",
+
+                    order: 3
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                title: {
+
+                    display: true,
+
+                    text: currentSheetName + " - Distribution"
+
+                },
+
+                legend: {
+
+                    labels: {
+
+                        usePointStyle: true,
+
+                        filter: (item) => item.text !== ""
+
+                    }
+
+                }
+
+            },
+
+            scales: {
+
+                x: {
+
+                    type: "category",
+
+                    title: {
+
+                        display: true,
+
+                        text: "Inspection Point"
+
+                    }
+
+                },
+
+                y: {
+
+                    title: {
+
+                        display: true,
+
+                        text: "Measured Value"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
             function downloadURI(uri, name) {
                 const link = document.createElement("a");
                 link.download = name;
@@ -1003,18 +1292,17 @@
             function saveCurrentChart() {
                 if (!currentChart) return;
                 const canvas = document.getElementById("myChart");
-                const headers = Array.from(document.querySelectorAll(".col-header")).map(
-                    (th) => th.textContent.trim() || `Column_${activeColumnIndex + 1}`
-                );
-                //const fileName = `${headers[activeColumnIndex].replace(/[^a-z0-9]/gi, '_')}_Analysis.png`;
-                const fileName =
-                    headers[activeColumnIndex]
-                        .trim()
-                        .normalize("NFC")
-                        .replace(/[\\/:*?"<>|]/g, "_")
-                        .replace(/[ .]+/g, "_") + "_Analysis.png";
+                let fileName = document.getElementById("currentColumnLabel").textContent;
+                // Remove "Viewing: "
+                fileName = fileName.replace(/^Viewing:\s*/, "");
+                // Make filename safe
+                fileName = fileName
+                    .trim()
+                    .normalize("NFC")
+                    .replace(/[\\/:*?"<>|]/g, "_")
+                    .replace(/[ .]+/g, "_");
                 const dataURL = canvas.toDataURL("image/png");
-                downloadURI(dataURL, fileName);
+                downloadURI(dataURL, fileName + "_Analysis.png");
             }
             async function saveAllCharts() {
                 const headers = Array.from(document.querySelectorAll(".col-header")).map(
@@ -1067,21 +1355,17 @@
             document.getElementById("importExcelBtn").addEventListener("click", () => {
                 excelFileInput.click();
             });
-
             excelFileInput.addEventListener("change", function () {
                 if (!this.files.length) return;
-
                 importExcel(this.files[0]);
-
                 this.value = "";
             });
-
             document.getElementById("sheetSelect").addEventListener("change", function () {
                 if (!workbook) return;
-
                 loadSheet(this.value);
             });
             initGrid();
+            document.getElementById("chartMode").addEventListener("change", updateChart);
         </script>
     </body>
 </html>
