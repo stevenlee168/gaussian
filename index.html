@@ -972,6 +972,22 @@
                 });
             }
 
+            const whiteBackgroundPlugin = {
+                id: "whiteBackground",
+
+                beforeDraw(chart) {
+                    const { ctx, width, height } = chart;
+
+                    ctx.save();
+
+                    ctx.globalCompositeOperation = "destination-over";
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, width, height);
+
+                    ctx.restore();
+                },
+            };
+
             function drawTrending() {
                 if (currentChart) {
                     currentChart.destroy();
@@ -1038,6 +1054,7 @@
                             },
                         ],
                     },
+                    plugins: [whiteBackgroundPlugin],
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
@@ -1060,225 +1077,195 @@
             }
 
             function drawErrorBar() {
-
-    if (currentChart) {
-        currentChart.destroy();
-        currentChart = null;
-    }
-
-    const labels = [];
-    const means = [];
-    const lsls = [];
-    const specs = [];
-    const usls = [];
-
-    // One dataset for ALL measurements
-    const measurementData = [];
-
-    for (let c = 0; c < colCount; c++) {
-
-        const stats = getColumnStats(c);
-
-        if (!stats) continue;
-
-        const label = headerRow.cells[c + 1].textContent.trim() || `Column ${c + 1}`;
-
-        labels.push(label);
-
-        means.push(stats.mean);
-        lsls.push(stats.lsl);
-        specs.push(stats.spec);
-        usls.push(stats.usl);
-
-        // Add every measured point
-        stats.rawData.forEach(value => {
-
-            measurementData.push({
-                x: label,
-                y: value
-            });
-
-        });
-
-    }
-
-    const ctx = document.getElementById("myChart").getContext("2d");
-
-    currentChart = new Chart(ctx, {
-
-        type: "line",
-
-        data: {
-
-            labels,
-
-            datasets: [
-
-                // All measured points
-                {
-                    label: "Measurements",
-                    type: "scatter",
-
-                    data: measurementData,
-
-                    showLine: false,
-
-                    pointRadius: 3,
-
-                    pointHoverRadius: 5,
-
-                    pointBackgroundColor: "rgba(120,220,120,0.45)",
-
-                    pointBorderColor: "rgba(120,220,120,0.45)",
-
-                    order: 1
-                },
-
-                // Average
-                {
-                    label: "Average",
-
-                    data: means,
-
-                    showLine: false,
-
-                    pointRadius: 5,
-
-                    pointHoverRadius: 7,
-
-                    pointBackgroundColor: "green",
-
-                    pointBorderColor: "green",
-
-                    order: 2
-                },
-
-                // SPEC
-                {
-                    label: "SPEC",
-
-                    data: specs,
-
-                    showLine: false,
-
-                    pointStyle: "line",
-
-                    pointRadius: 14,
-
-                    pointBorderWidth: 3,
-
-                    pointBorderColor: "black",
-
-                    order: 3
-                },
-
-                // LSL
-                {
-                    label: "LSL",
-
-                    data: lsls,
-
-                    showLine: false,
-
-                    pointStyle: "line",
-
-                    pointRadius: 14,
-
-                    pointBorderWidth: 3,
-
-                    pointBorderColor: "blue",
-
-                    order: 3
-                },
-
-                // USL
-                {
-                    label: "USL",
-
-                    data: usls,
-
-                    showLine: false,
-
-                    pointStyle: "line",
-
-                    pointRadius: 14,
-
-                    pointBorderWidth: 3,
-
-                    pointBorderColor: "red",
-
-                    order: 3
+                if (currentChart) {
+                    currentChart.destroy();
+                    currentChart = null;
                 }
 
-            ]
+                const labels = [];
+                const means = [];
+                const lsls = [];
+                const specs = [];
+                const usls = [];
 
-        },
+                // One dataset for ALL measurements
+                const measurementData = [];
 
-        options: {
+                for (let c = 0; c < colCount; c++) {
+                    const stats = getColumnStats(c);
 
-            responsive: true,
+                    if (!stats) continue;
 
-            maintainAspectRatio: false,
+                    const label = headerRow.cells[c + 1].textContent.trim() || `Column ${c + 1}`;
 
-            plugins: {
+                    labels.push(label);
 
-                title: {
+                    means.push(stats.mean);
+                    lsls.push(stats.lsl);
+                    specs.push(stats.spec);
+                    usls.push(stats.usl);
 
-                    display: true,
-
-                    text: currentSheetName + " - Distribution"
-
-                },
-
-                legend: {
-
-                    labels: {
-
-                        usePointStyle: true,
-
-                        filter: (item) => item.text !== ""
-
-                    }
-
+                    // Add every measured point
+                    stats.rawData.forEach((value) => {
+                        measurementData.push({
+                            x: label,
+                            y: value,
+                        });
+                    });
                 }
 
-            },
+                const ctx = document.getElementById("myChart").getContext("2d");
 
-            scales: {
+                currentChart = new Chart(ctx, {
+                    type: "line",
 
-                x: {
+                    data: {
+                        labels,
 
-                    type: "category",
+                        datasets: [
+                            // All measured points
+                            {
+                                label: "Measurements",
+                                type: "scatter",
 
-                    title: {
+                                data: measurementData,
 
-                        display: true,
+                                showLine: false,
 
-                        text: "Inspection Point"
+                                pointRadius: 3,
 
-                    }
+                                pointHoverRadius: 5,
 
-                },
+                                pointBackgroundColor: "rgba(120,220,120,0.45)",
 
-                y: {
+                                pointBorderColor: "rgba(120,220,120,0.45)",
 
-                    title: {
+                                order: 1,
+                            },
 
-                        display: true,
+                            // Average
+                            {
+                                label: "Average",
 
-                        text: "Measured Value"
+                                data: means,
 
-                    }
+                                showLine: false,
 
-                }
+                                pointRadius: 5,
 
+                                pointHoverRadius: 7,
+
+                                pointBackgroundColor: "green",
+
+                                pointBorderColor: "green",
+
+                                order: 2,
+                            },
+
+                            // SPEC
+                            {
+                                label: "SPEC",
+
+                                data: specs,
+
+                                showLine: false,
+
+                                pointStyle: "line",
+
+                                pointRadius: 14,
+
+                                pointBorderWidth: 3,
+
+                                pointBorderColor: "black",
+
+                                order: 3,
+                            },
+
+                            // LSL
+                            {
+                                label: "LSL",
+
+                                data: lsls,
+
+                                showLine: false,
+
+                                pointStyle: "line",
+
+                                pointRadius: 14,
+
+                                pointBorderWidth: 3,
+
+                                pointBorderColor: "blue",
+
+                                order: 3,
+                            },
+
+                            // USL
+                            {
+                                label: "USL",
+
+                                data: usls,
+
+                                showLine: false,
+
+                                pointStyle: "line",
+
+                                pointRadius: 14,
+
+                                pointBorderWidth: 3,
+
+                                pointBorderColor: "red",
+
+                                order: 3,
+                            },
+                        ],
+                    },
+
+                    plugins: [whiteBackgroundPlugin],
+
+                    options: {
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+                            title: {
+                                display: true,
+
+                                text: currentSheetName + " - Distribution",
+                            },
+
+                            legend: {
+                                labels: {
+                                    usePointStyle: true,
+
+                                    filter: (item) => item.text !== "",
+                                },
+                            },
+                        },
+
+                        scales: {
+                            x: {
+                                type: "category",
+
+                                title: {
+                                    display: true,
+
+                                    text: "Inspection Point",
+                                },
+                            },
+
+                            y: {
+                                title: {
+                                    display: true,
+
+                                    text: "Measured Value",
+                                },
+                            },
+                        },
+                    },
+                });
             }
-
-        }
-
-    });
-
-}
 
             function downloadURI(uri, name) {
                 const link = document.createElement("a");
