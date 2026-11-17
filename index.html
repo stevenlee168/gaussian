@@ -317,12 +317,9 @@
     <script>
       let comparisonValues = {
         SPEC: [],
-        LSL: [],
-        USL: [],
+        AVG: [],
         MIN: [],
-        MAX: [],
-        R: [],
-        AVG: []
+        MAX: []
       };
       let currentSheetName = "";
       const gridBody = document.getElementById("gridBody");
@@ -704,12 +701,9 @@
         // Store Excel statistical values for Process Value Comparison
         const comparisonRowMapping = {
           SPEC: SPEC_ROW,
-          LSL: LSL_ROW,
-          USL: USL_ROW,
+          AVG: AVG_ROW,
           MIN: MIN_ROW,
-          MAX: MAX_ROW,
-          R: R_ROW,
-          AVG: AVG_ROW
+          MAX: MAX_ROW
         };
         comparisonValues = {};
         Object.entries(comparisonRowMapping).forEach(([label, rowIndex]) => {
@@ -821,14 +815,11 @@
         const thead = document.createElement("thead");
         const tableHeaderRow = document.createElement("tr");
         const headers = [
-          "Column Name",
-          "SPEC",
-          "LSL",
-          "USL",
-          "MIN",
-          "MAX",
-          "R",
-          "AVG"
+            "Column Name",
+            "SPEC",
+            "AVG",
+            "MIN",
+            "MAX"
         ];
         headers.forEach((header) => {
           const th = document.createElement("th");
@@ -850,12 +841,9 @@
           const values = [
             columnName,
             comparisonValues.SPEC?.[c],
-            comparisonValues.LSL?.[c],
-            comparisonValues.USL?.[c],
+            comparisonValues.AVG?.[c],
             comparisonValues.MIN?.[c],
             comparisonValues.MAX?.[c],
-            comparisonValues.R?.[c],
-            comparisonValues.AVG?.[c]
           ];
           // 9. Create each table cell
           values.forEach((value, index) => {
@@ -1560,12 +1548,9 @@
         // Clear imported comparison values
         comparisonValues = {
           SPEC: [],
-          LSL: [],
-          USL: [],
+          AVG: [],
           MIN: [],
-          MAX: [],
-          R: [],
-          AVG: []
+          MAX: []
         };
         currentSheetName = "";
         initGrid();
