@@ -587,57 +587,138 @@
                 reader.readAsArrayBuffer(file);
             }
 
-            function loadSheet(sheetName) {
-                const sheet = workbook.Sheets[sheetName];
-                currentSheetName = sheetName;
-                const rows = XLSX.utils.sheet_to_json(sheet, {
-                    header: 1,
-                    raw: true,
-                });
-                const TITLE_ROW = 4;
-                const SPEC_ROW = 55;
-                const LSL_ROW = 56;
-                const USL_ROW = 57;
-                const START_COL = 2;
-                let lastCol = START_COL;
-                while (rows[TITLE_ROW] && rows[TITLE_ROW][lastCol] !== undefined && rows[TITLE_ROW][lastCol] !== "") {
-                    lastCol++;
-                }
-                const totalCols = lastCol - START_COL;
-                headerRow.innerHTML =
-                    '<th class="row-index">#</th><th class="col-header" contenteditable="true">Column 1</th>';
-                colCount = 1;
-                activeColumnIndex = 0;
-                initGrid();
-                while (colCount < totalCols) addColumn();
-                for (let c = 0; c < totalCols; c++) {
-                    headerRow.cells[c + 1].textContent = rows[TITLE_ROW][START_COL + c] || `Column ${c + 1}`;
-                }
-                const DATA_START = 5;
-                const DATA_END = 54;
-                while (rowCount < DATA_END - DATA_START + 1) addDataRow();
-                for (let r = DATA_START; r <= DATA_END; r++) {
-                    for (let c = 0; c < totalCols; c++) {
-                        const value = rows[r]?.[START_COL + c];
-                        if (value !== undefined && value !== null)
-                            gridBody.rows[r - DATA_START].cells[c + 1].textContent =
-                                value === "" || value == null ? "" : format2Decimals(value);
-                    }
-                }
-                for (let c = 0; c < totalCols; c++) {
-                    const spec = rows[SPEC_ROW]?.[START_COL + c];
-                    document.getElementById("rowSpec").cells[c + 1].textContent =
-                        spec == null || spec === "" ? "" : format2Decimals(spec);
-                    const lsl = rows[LSL_ROW]?.[START_COL + c];
-                    document.getElementById("rowLSL").cells[c + 1].textContent =
-                        lsl == null || lsl === "" ? "" : format2Decimals(lsl);
-                    const usl = rows[USL_ROW]?.[START_COL + c];
-                    document.getElementById("rowUSL").cells[c + 1].textContent =
-                        usl == null || usl === "" ? "" : format2Decimals(usl);
-                }
-                bindHeaderInput();
-                updateChart();
-            }
+            
+function loadSheet(sheetName) {
+    const sheet = workbook.Sheets[sheetName];
+    currentSheetName = sheetName;
+
+    const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        raw: true,
+    });
+
+    // Excel configuration (0-based index)
+    const TITLE_ROW = 4;
+    const DATA_START = 5;
+    const START_COL = 2;
+    const LABEL_COL = 1; // Column B
+
+    // Find SPEC, LSL, USL by labels in Column B
+    function findLabelRow(label) {
+        return rows.findIndex((row) =>
+            row &&
+            String(row[LABEL_COL] ?? "").trim().toUpperCase() === label
+        );
+    }
+
+    const SPEC_ROW = findLabelRow("SPEC");
+    const LSL_ROW = findLabelRow("LSL");
+    const USL_ROW = findLabelRow("USL");
+
+    // Validate specification rows
+    if (SPEC_ROW === -1 || LSL_ROW === -1 || USL_ROW === -1) {
+        alert("Cannot find SPEC, LSL, or USL in Column B.");
+        return;
+    }
+
+    // Ensure specification rows follow the expected order
+    if (!(SPEC_ROW < LSL_ROW && LSL_ROW < USL_ROW)) {
+        alert("Invalid Excel layout: SPEC, LSL, USL must be in this order.");
+        return;
+    }
+
+    // Find the number of data columns from the title row
+    let lastCol = START_COL;
+
+    while (
+        rows[TITLE_ROW] &&
+        rows[TITLE_ROW][lastCol] !== undefined &&
+        rows[TITLE_ROW][lastCol] !== ""
+    ) {
+        lastCol++;
+    }
+
+    const totalCols = lastCol - START_COL;
+
+    if (totalCols <= 0) {
+        alert("No column headers found in Excel.");
+        return;
+    }
+
+    // Calculate dynamic data row count
+    const totalDataRows = SPEC_ROW - DATA_START;
+
+    if (totalDataRows < 0) {
+        alert("No valid data rows found before SPEC.");
+        return;
+    }
+
+    // Reset grid
+    headerRow.innerHTML =
+        '<th class="row-index">#</th><th class="col-header" contenteditable="true">Column 1</th>';
+
+    colCount = 1;
+    activeColumnIndex = 0;
+
+    initGrid();
+
+    // Add columns
+    while (colCount < totalCols) {
+        addColumn();
+    }
+
+    // Set column headers
+    for (let c = 0; c < totalCols; c++) {
+        headerRow.cells[c + 1].textContent =
+            rows[TITLE_ROW][START_COL + c] || `Column ${c + 1}`;
+    }
+
+    // Adjust grid to match imported data row count
+    while (rowCount < totalDataRows) {
+        addDataRow();
+    }
+
+    while (rowCount > totalDataRows) {
+        gridBody.deleteRow(gridBody.rows.length - 1);
+        rowCount--;
+    }
+
+    // Import all data rows
+    for (let r = 0; r < totalDataRows; r++) {
+        const excelRow = DATA_START + r;
+
+        for (let c = 0; c < totalCols; c++) {
+            const value = rows[excelRow]?.[START_COL + c];
+
+            gridBody.rows[r].cells[c + 1].textContent =
+                value === undefined || value === null || value === ""
+                    ? ""
+                    : format2Decimals(value);
+        }
+    }
+
+    // Import SPEC, LSL, USL
+    const footerMapping = [
+        { id: "rowSpec", row: SPEC_ROW },
+        { id: "rowLSL", row: LSL_ROW },
+        { id: "rowUSL", row: USL_ROW },
+    ];
+
+    footerMapping.forEach(({ id, row }) => {
+        for (let c = 0; c < totalCols; c++) {
+            const value = rows[row]?.[START_COL + c];
+
+            document.getElementById(id).cells[c + 1].textContent =
+                value === undefined || value === null || value === ""
+                    ? ""
+                    : format2Decimals(value);
+        }
+    });
+
+    bindHeaderInput();
+    updateChart();
+}
+
 
             function updateChart() {
                 const mode = document.getElementById("chartMode").value;
